@@ -34,6 +34,7 @@ fun MoeAppearanceDialog(show: Boolean, onDismiss: () -> Unit) {
     var textRamdisk by remember { mutableStateOf(MoePrefs.get(ctx, MoePrefs.KEY_RAMDISK)) }
     var textSupport by remember { mutableStateOf(MoePrefs.get(ctx, MoePrefs.KEY_SUPPORT)) }
 
+    @Composable
     fun field(label: String, value: String, hint: String, onChange: (String) -> Unit) {
         Text(
             label,
