@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PowerSettingsNew
@@ -96,6 +97,8 @@ import com.topjohnwu.magisk.ui.navigation.LocalNavigator
 import com.topjohnwu.magisk.ui.navigation.Route
 import java.io.File
 import com.topjohnwu.magisk.core.R as CoreR
+import com.topjohnwu.magisk.ui.moe.MoeAppearanceDialog
+import com.topjohnwu.magisk.ui.moe.MoeBanner
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -184,6 +187,9 @@ fun HomeScreen(
     }
 
     val scrollState = rememberScrollState()
+    var showMoeDialog by remember { mutableStateOf(false) }
+
+    MoeAppearanceDialog(show = showMoeDialog, onDismiss = { showMoeDialog = false })
 
     Scaffold(
         modifier = modifier,
@@ -192,6 +198,12 @@ fun HomeScreen(
                 title = { Text(stringResource(CoreR.string.section_home)) },
                 scrollBehavior = scrollBehavior,
                 actions = {
+                    IconButton(onClick = { showMoeDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Palette,
+                            contentDescription = "打扮本小姐",
+                        )
+                    }
                     if (Info.env.isActive) {
                         IconButton(onClick = { viewModel.onDeletePressed() }) {
                             Icon(
@@ -229,6 +241,8 @@ fun HomeScreen(
                 ),
             spacing = 12.dp,
             first = {
+                MoeBanner(modifier = Modifier.fillMaxWidth())
+
                 if (uiState.isNoticeVisible) {
                     NoticeCard(onHide = viewModel::hideNotice)
                 }
