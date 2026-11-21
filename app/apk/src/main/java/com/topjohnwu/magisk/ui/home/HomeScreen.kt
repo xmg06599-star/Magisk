@@ -3,6 +3,7 @@ package com.topjohnwu.magisk.ui.home
 import android.os.Build
 import android.os.PowerManager
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,6 +62,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -98,6 +101,15 @@ import com.topjohnwu.magisk.ui.navigation.Route
 import java.io.File
 import com.topjohnwu.magisk.core.R as CoreR
 import com.topjohnwu.magisk.ui.moe.MoeAppearanceDialog
+import com.topjohnwu.magisk.ui.moe.MoeCheckMark
+import com.topjohnwu.magisk.ui.moe.MoeHeroShape
+import com.topjohnwu.magisk.ui.moe.MoePageBackground
+import com.topjohnwu.magisk.ui.moe.MoePrefs
+import com.topjohnwu.magisk.ui.moe.moeCardColors
+import com.topjohnwu.magisk.ui.moe.moeGlass
+import com.topjohnwu.magisk.ui.moe.moeGlassBorder
+import com.topjohnwu.magisk.ui.moe.moeHeroBrush
+import com.topjohnwu.magisk.ui.moe.moeText
 import com.topjohnwu.magisk.ui.moe.MoeBanner
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -191,11 +203,15 @@ fun HomeScreen(
 
     MoeAppearanceDialog(show = showMoeDialog, onDismiss = { showMoeDialog = false })
 
+    Box(modifier = modifier.fillMaxSize()) {
+    MoePageBackground {
     Scaffold(
-        modifier = modifier,
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(CoreR.string.section_home)) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = { showMoeDialog = true }) {
@@ -267,7 +283,7 @@ fun HomeScreen(
             },
             second = {
                 Text(
-                    text = stringResource(CoreR.string.home_support_title),
+                    text = moeText(MoePrefs.KEY_SUPPORT, stringResource(CoreR.string.home_support_title)),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary,
@@ -286,6 +302,9 @@ fun HomeScreen(
                 DevelopersCard(onLinkClicked = viewModel::onLinkPressed)
             },
         )
+    }
+
+    }
     }
 
     InstallDialog(
@@ -476,15 +495,17 @@ private fun CoreCard(
         HomeViewModel.State.LOADING -> null
     }
 
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    val showCheck = MoePrefs.showCheck(LocalContext.current)
+    Box(
+        modifier = modifier
+            .clip(MoeHeroShape)
+            .background(moeHeroBrush())
+            .border(1.dp, moeGlassBorder(), MoeHeroShape),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
+                .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 22.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -501,7 +522,7 @@ private fun CoreCard(
                 Spacer(Modifier.width(16.dp))
                 Column {
                     Text(
-                        text = stringResource(CoreR.string.magisk),
+                        text = moeText(MoePrefs.KEY_MAGISK, stringResource(CoreR.string.magisk)),
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(
@@ -528,6 +549,14 @@ private fun CoreCard(
                 )
             }
         }
+
+        if (showCheck) {
+            MoeCheckMark(
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 10.dp, bottom = 10.dp)
+            )
+        }
     }
 }
 
@@ -550,7 +579,7 @@ private fun AppCard(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = CardDefaults.cardColors(containerColor = moeGlass()),
     ) {
         Column(
             modifier = Modifier
@@ -571,7 +600,7 @@ private fun AppCard(
                     )
                     Spacer(Modifier.width(16.dp))
                     Text(
-                        text = stringResource(CoreR.string.home_app_title),
+                        text = moeText(MoePrefs.KEY_APP, stringResource(CoreR.string.home_app_title)),
                         style = MaterialTheme.typography.titleLarge
                     )
                 }
@@ -636,11 +665,11 @@ private fun StatusCard(
 ) {
     val statuses = listOf(
         StatusInfo(
-            label = stringResource(CoreR.string.zygisk),
+            label = moeText(MoePrefs.KEY_ZYGISK, stringResource(CoreR.string.zygisk)),
             status = stringResource(if (Info.isZygiskEnabled) CoreR.string.enabled else CoreR.string.disabled)
         ),
         StatusInfo(
-            label = stringResource(CoreR.string.ramdisk),
+            label = moeText(MoePrefs.KEY_RAMDISK, stringResource(CoreR.string.ramdisk)),
             status = stringResource(if (Info.ramdisk) CoreR.string.yes else CoreR.string.no)
         )
     )
@@ -648,7 +677,7 @@ private fun StatusCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = CardDefaults.cardColors(containerColor = moeGlass()),
     ) {
         Row(
             modifier = Modifier
@@ -696,7 +725,7 @@ private fun SupportCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = CardDefaults.cardColors(containerColor = moeGlass()),
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Text(
@@ -780,7 +809,7 @@ private fun DevelopersCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = CardDefaults.cardColors(containerColor = moeGlass()),
     ) {
         Column {
             developers.forEachIndexed { index, dev ->
